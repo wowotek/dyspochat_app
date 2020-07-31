@@ -25,7 +25,7 @@ export default {
   methods: {
       send_message: function(){
         this.axios
-            .put("http://192.168.1.5:5000/chat", {
+            .put("http://10.184.0.3:5000/chat", {
                 chatroom_id: this.chatroom.id,
                 chat_sender: this.user.id,
                 chat_message: this.message_content
