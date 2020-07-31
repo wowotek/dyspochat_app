@@ -1,6 +1,6 @@
 <template>
     <div class="content" style="padding-top: 0.5%">
-        <h1 class="title is-4 has-text-white">{{ chatroom.id }}</h1>
+        <h1 class="title is-4 has-text-white">ID: {{ chatroom.id }}</h1>
         <h1 class="subtitle is-6 has-text-white">
         <span style="margin-right: 0.5%">
             Recipients:

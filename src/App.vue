@@ -42,19 +42,34 @@
             </section>
           </div>
           <div class="column has-background-grey" style="padding: 0">
-            <section v-if="chatroom" style="height: 100%">
+            <section v-if="chatroom == null" class="has-background-warning" style="height: 100%">
+              <h1 class="title has-text-centered" style="padding-top: 10vw">Select, Create, or Join Chatroom</h1>
+            </section>
+            <section v-else style="height: 100%">
                 <section class="has-background-dark" style="margin:0; padding-left: 2%; height: 8%; border-left: 1px solid grey">
                   <article class="media">
                     <div class="media-content">
                       <ChatroomInfo :chatroom="chatroom"/>
                     </div>
                     <div class="media-right" style="padding-right: 1%">
-                      <button class="button is-danger" style="margin-top:15%">
-                        <span class="icon">
-                          <i class="fas fa-trash"></i>
-                        </span>
-                        <span>Delete</span>
-                      </button>
+                      <div class="field has-addons">
+                        <p class="control">
+                          <button class="button is-danger" style="margin-top:15%" v-on:click="delete_room(chatroom.id)">
+                            <span class="icon">
+                              <i class="fas fa-trash"></i>
+                            </span>
+                            <span>Delete</span>
+                          </button>
+                        </p>
+                        <p class="control">
+                          <button class="button is-warning" style="margin-top:15%" v-on:click="leave_room(chatroom.id)">
+                            <span class="icon">
+                              <i class="fas fa-sign-out-alt"></i>
+                            </span>
+                            <span>Leave</span>
+                          </button>
+                        </p>
+                      </div>
                     </div>
                   </article>
                 </section>
@@ -63,11 +78,8 @@
                   <div style="margin-bottom: 45%"></div>
                 </section>
                 <section class="has-background-dark" style="height: 8%; bottom: 0; padding: 1%; padding-top: 0.7%">
-                  <MessageInput :chatroom="chatroom" :user="user" v-on:message_sent="message_update"/>
+                  <MessageInput :chatroom="chatroom" :user="user"/>
                 </section>
-            </section>
-            <section v-if="!chatroom" class="has-background-warning" style="height: 100%">
-              <h1 class="title has-text-centered" style="padding-top: 10vw">Select, Create, or Join Chatroom</h1>
             </section>
           </div>
         </div>
@@ -84,8 +96,6 @@
   import MessageInput from './components/MessageInput.vue'
   import MessageBubble from './components/MessageBubble.vue'
   import Pusher from "pusher-js";
-
-  
 
   function sortMessage(messages){
     let len = messages.length;
@@ -120,19 +130,84 @@
         authenticated: false,
         user: {},
         session: {},
-        chatroom: {},
+        chatroom: null,
         chatrooms: [],
         message: "",
         message_class: "",
         pusher: null,
-        notification: null
+        recipient_notifications: null,
+        chat_notifications: null
       }
       return datas;
     },
     methods: {
-      async message_update(chatroom_id){
+      delete_room(room_id){
         this.axios({
-            url: "http://localhost:5000/chatroom/"+chatroom_id,
+            url: "http://192.168.1.5:5000/chatroom/"+room_id,
+            method: "DELETE",
+            headers: {
+              'x-api-key': 'wowotek-key',
+            }
+          })
+          .then(response_ => {
+            console.log(response_);
+            if(response_.data.status == "success"){
+              for(var i=0; i<this.chatrooms.length; i++){
+                if(this.chatrooms[i].id == room_id){
+                  this.chatrooms.splice(i);
+                  this.chatroom = null;
+                  return;
+                }
+              }
+            }
+          })
+          .catch(error => {
+            console.log(error);
+            this.message = "Unexpected error, try again";
+            this.message_class = "has-background-danger";
+            this.processing = false;
+          });
+      },
+      leave_room(room_id){
+        this.axios
+          .patch("http://192.168.1.5:5000/chatroom", {
+              chatroom_id: room_id,
+              recipient_id: this.user.id
+          },{
+              headers: {'x-api-key': 'wowotek-key'}
+          })
+          .then(response => {
+              this.processing = false;
+              if (response.data.status == "success"){
+                  this.message = "Successfully Leaving Room";
+                  this.message_class = "has-background-success";
+              } else {
+                  this.message = "Failed to Leave room";
+                  this.message_class = "has-background-warning";
+              }
+          })
+          .catch(error => {
+              error;
+              this.message = "Unexpected error, try again";
+              this.message_class = "has-background-danger";
+              this.processing = false;
+          });
+          for(var i=0; i<this.chatrooms.length; i++){
+            if(this.chatrooms[i].id == room_id){
+              this.chatrooms.splice(i);
+              this.chatroom = null;
+              return;
+            }
+          }
+          console.log("Leaving Chatroom");
+          console.log(this.chatroom);
+      },
+      push_notification(notification_message){
+        console.log(notification_message);
+      },
+      message_update(chatroom_id){
+        this.axios({
+            url: "http://192.168.1.5:5000/chatroom/"+chatroom_id,
             method: "GET",
             headers: {
               'x-api-key': 'wowotek-key',
@@ -152,11 +227,11 @@
             this.processing = false;
           });
       },
-      async openChatroom(chatroom_id){
+      openChatroom(chatroom_id){
         for(var i=0; i<this.chatrooms.length; i++){
           if(this.chatrooms[i].id == chatroom_id){
             this.axios({
-                url: "http://localhost:5000/chatroom/"+this.chatrooms[i].id,
+                url: "http://192.168.1.5:5000/chatroom/"+this.chatrooms[i].id,
                 method: "GET",
                 headers: {
                   'x-api-key': 'wowotek-key',
@@ -181,7 +256,7 @@
             }
         }
       },
-      async setAuthenticated(login_status, session, user){
+      setAuthenticated(login_status, session, user){
         this.authenticated = true;
         this.session = {
           id: session.id,
@@ -200,19 +275,44 @@
           secret: '5ca06be10cf15aa08d86'
         });
       },
-      async handleMenuAction(action, chatroom_data){
-        this.notifications = this.pusher.subscribe(
+      handleMenuAction(action, chatroom_data){
+        this.recipient_notifications = this.pusher.subscribe(
           chatroom_data.id.toString()
         );
 
-        this.notifications.bind("new_recipient", data => {
-          console.log("notification data");
-          console.log(data);
-          this.message = JSON.stringify(data);
+        this.recipient_notifications.bind("new_recipient", data => {
+          if(data.recipient.id === this.user.id){
+            this.push_notification("You Joined your chatroom id: " + data.chatroom.id);
+          } else {
+            this.push_notification(data.recipient.pseudonym + " Joined your chatroom id: " + data.chatroom.id);
+          }
+          this.message_update(data.chatroom.id);
         });
+
+        this.recipient_notifications.bind("del_recipient", data => {
+          if(data.recipient.id === this.user.id){
+            this.push_notification("You Are Leaving chatroom id: " + data.chatroom.id);
+          } else {
+            this.push_notification(data.recipient.pseudonym + " Leaving chatroom id: " + data.chatroom.id);
+          }
+        });
+
+        this.chat_notifications = this.pusher.subscribe(
+          chatroom_data.id.toString()
+        );
+
+        this.chat_notifications.bind("new_chat", data => {
+          this.push_notification("New chat from " + data.chat.sender.pseudonym + "in chatroom id " + data.chatroom.id)
+          this.message_update(data.chatroom.id);
+        });
+
+        this.chat_notifications.bind("del_chat", data => {
+          this.push_notification("Someone deleted chatroom id " + data.chatroom.id);
+        });
+        
         if(action == "add"){  // Add Chatroom
           this.axios          // Join Chatroom after creating it
-            .post("http://localhost:5000/chatroom", {
+            .post("http://192.168.1.5:5000/chatroom", {
                 chatroom_id: chatroom_data.id,
                 recipient_id: this.user.id
             },{
@@ -227,7 +327,7 @@
                     console.log("GET Chatroominfo");
                     console.log(chatroom_data.id);
                     this.axios({
-                        url: "http://localhost:5000/chatroom/"+chatroom_data.id,
+                        url: "http://192.168.1.5:5000/chatroom/"+chatroom_data.id,
                         method: "GET",
                         headers: {
                           'x-api-key': 'wowotek-key',
@@ -265,7 +365,7 @@
           console.log("GET Chatroominfo");
           console.log(chatroom_data.id);
           this.axios({
-              url: "http://localhost:5000/chatroom/"+chatroom_data.id,
+              url: "http://192.168.1.5:5000/chatroom/"+chatroom_data.id,
               method: "GET",
               headers: {
                 'x-api-key': 'wowotek-key',

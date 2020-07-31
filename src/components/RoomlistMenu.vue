@@ -34,7 +34,7 @@
                     <input v-model="chat_id" type="text" class="input">
                     <div class="field is-grouped is-grouped-right">
                         <p class="control">
-                            <a class="button is-info" onclick="join_chatroom()" v-on:click="join_chatroom">Join</a>
+                            <a class="button is-info" v-on:click="join_chatroom">Join</a>
                         </p>
                         <p class="control">
                             <a class="button is-danger" onclick="cancel_join()">Cancel</a>
@@ -62,7 +62,7 @@ export default {
       create_chatroom: function(){
           this.processing = true;
           this.axios
-            .put("http://localhost:5000/chatroom", {}, {
+            .put("http://192.168.1.5:5000/chatroom", {}, {
                 headers: {'x-api-key': 'wowotek-key'}
             })
             .then(response => {
@@ -86,7 +86,7 @@ export default {
       join_chatroom: function(){
           this.processing = true;
           this.axios
-            .post("http://localhost:5000/chatroom", {
+            .post("http://192.168.1.5:5000/chatroom", {
                 chatroom_id: this.chat_id,
                 recipient_id: this.user.id
             },{
