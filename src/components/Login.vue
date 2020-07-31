@@ -62,7 +62,7 @@ export default {
                 return;
             }
             this.axios
-                .post("http://10.184.0.3:5000/user",{
+                .post("http://34.101.203.39:5000/user",{
                     username: this.username,
                     password: this.password
                 }, {
@@ -96,7 +96,7 @@ export default {
                 return;
             }
             this.axios
-                .put("http://10.184.0.3:5000/user",{
+                .put("http://34.101.203.39:5000/user",{
                     username: this.username,
                     password: this.password
                 }, {

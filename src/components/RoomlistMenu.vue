@@ -62,7 +62,7 @@ export default {
       create_chatroom: function(){
           this.processing = true;
           this.axios
-            .put("http://10.184.0.3:5000/chatroom", {}, {
+            .put("http://34.101.203.39:5000/chatroom", {}, {
                 headers: {'x-api-key': 'wowotek-key'}
             })
             .then(response => {
@@ -86,7 +86,7 @@ export default {
       join_chatroom: function(){
           this.processing = true;
           this.axios
-            .post("http://10.184.0.3:5000/chatroom", {
+            .post("http://34.101.203.39:5000/chatroom", {
                 chatroom_id: this.chat_id,
                 recipient_id: this.user.id
             },{
