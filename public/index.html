@@ -1,17 +1,174 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" style="height: 100%">
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
     <link rel="icon" href="<%= BASE_URL %>favicon.ico">
+
+    <script defer src="<%= BASE_URL %>fontawesome.js"></script>
+    <link rel="stylesheet" href="<%= BASE_URL %>bulma.css">
+
     <title><%= htmlWebpackPlugin.options.title %></title>
+    <style>
+      body,
+      html {
+          overflow: hidden;
+      }
+      .msg_fp {
+          margin-right: 55%;
+          margin-bottom: 0.5%
+      }
+
+      .msg_op {
+          margin-left: 55%;
+          margin-bottom: 0.5%
+      }
+
+      .msg {
+          padding: 1%;
+          padding-left: 2%
+      }
+
+      @keyframes menu_closed_kf {
+          from {
+              opacity: 1;
+              transform: scale(100%, 100%);
+          }
+          to {
+              opacity: 0;
+              transform: scale(100%, 0%);
+          }
+      }
+
+      @keyframes menu_open_kf {
+          from {
+              opacity: 0;
+              transform: scale(100%, 0%);
+          }
+          to {    
+              opacity: 1;
+              transform: scale(100%, 100%);
+          }
+      }
+
+      .menu_closed {
+          transform-origin: top;
+          animation-name: menu_closed_kf;
+          animation-duration: 0.25s;
+          transform: scale(100%, 0%);
+      }
+
+      .menu_open {
+          transform-origin: top;
+          animation-name: menu_open_kf;
+          animation-duration: 0.25s;
+          transform: scale(100%, 100%);
+      }
+
+      .dsbl {
+          display: none;
+      }
+      @keyframes submenu_close_kf {
+          from {
+              opacity: 1;
+              transform: translate(0%, 0);
+          }
+          to {
+              opacity: 0;
+              transform: translate(110%, 0);
+          }
+      }
+      @keyframes submenu_open_kf {
+          from {
+              opacity: 0;    
+              transform: translate(-110%, 0);
+          }
+          to {
+              opacity: 1;
+              transform: translate(0%, 0);
+          }
+      }
+      .submenu_close {
+          animation-name: submenu_close_kf;
+          animation-duration: 0.25s;
+          opacity: 0;
+          transform: translate(110%, 0);
+      }
+      .submenu_open {
+          animation-name: submenu_open_kf;
+          animation-duration: 0.25s;
+          opacity: 1;
+          transform: translate(0%, 0);
+      }
+    </style>
+    <script>
+      var submenu = "submenu";
+      function create_chatroom_menu(){
+          document.getElementById("submenu").className ="box my-0 submenu_close";
+          setTimeout(() => {
+              document.getElementById("submenu").className ="dsbl";
+              document.getElementById("new_menu").className ="box has-background-info my-0 submenu_open";
+          }, 250);
+          submenu = "new_menu";
+      }
+      function join_chatroom_menu(){
+          document.getElementById("submenu").className ="box my-0 submenu_close";
+          setTimeout(() => {
+              document.getElementById("submenu").className ="dsbl";
+              document.getElementById("join_menu").className ="box has-background-success my-0 submenu_open";
+          }, 250);
+          submenu = "join_menu";
+      }
+      function cancel_new(){
+          document.getElementById("new_menu").className ="box has-background-info my-0 submenu_close";
+          setTimeout(() => {
+              document.getElementById("new_menu").className ="dsbl";
+              document.getElementById("submenu").className ="box my-0 submenu_open";
+          }, 250);
+          submenu = "submenu";
+      }
+      function cancel_join(){
+          document.getElementById("join_menu").className ="box has-background-success my-0 submenu_close";
+          setTimeout(() => {
+              document.getElementById("join_menu").className ="dsbl";
+              document.getElementById("submenu").className ="box my-0 submenu_open";
+          }, 250);
+          submenu = "submenu";
+      }
+
+      var menu = true;
+      function tambah(){
+          if(menu){
+              document.getElementById("tambah_text").innerHTML = "Close";
+              document.getElementById("tambah").className = "button is-warning is-fullwidth";
+              document.getElementById("menu").className = "menu_open";
+
+              document.getElementById("join_menu").className ="dsbl";
+              document.getElementById("new_menu").className ="dsbl";
+              document.getElementById("submenu").className ="box my-0 submenu_open";
+
+              submenu = "submenu";
+          }
+          else {
+              document.getElementById("tambah_text").innerHTML = "Add Chatroom";
+              document.getElementById("tambah").className = "button is-info is-fullwidth";
+              document.getElementById("menu").className = "menu_closed";
+
+              document.getElementById(submenu).className = "submenu_close"
+              setTimeout(() => {
+                  document.getElementById("menu").className = "dsbl";
+              }, 250);
+          }
+
+          menu = !menu;
+      }
+    </script>
   </head>
-  <body>
+  <body style="height: 100%">
     <noscript>
       <strong>We're sorry but <%= htmlWebpackPlugin.options.title %> doesn't work properly without JavaScript enabled. Please enable it to continue.</strong>
     </noscript>
-    <div id="app"></div>
-    <!-- built files will be auto injected -->
+    <div id="app"><!-- APP --></div>
   </body>
 </html>
