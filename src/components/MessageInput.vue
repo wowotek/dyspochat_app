@@ -25,7 +25,7 @@ export default {
   methods: {
       send_message: function(){
         this.axios
-            .put("http://34.101.203.39:5000/chat", {
+            .put("http://api.dyspochat.com/chat", {
                 chatroom_id: this.chatroom.id,
                 chat_sender: this.user.id,
                 chat_message: this.message_content

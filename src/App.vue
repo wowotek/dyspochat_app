@@ -143,7 +143,7 @@
     methods: {
       delete_room(room_id){
         this.axios({
-            url: "http://34.101.203.39:5000/chatroom/"+room_id,
+            url: "http://api.dyspochat.com/chatroom/"+room_id,
             method: "DELETE",
             headers: {
               'x-api-key': 'wowotek-key',
@@ -170,7 +170,7 @@
       },
       leave_room(room_id){
         this.axios
-          .patch("http://34.101.203.39:5000/chatroom", {
+          .patch("http://api.dyspochat.com/chatroom", {
               chatroom_id: room_id,
               recipient_id: this.user.id
           },{
@@ -207,7 +207,7 @@
       },
       message_update(chatroom_id){
         this.axios({
-            url: "http://34.101.203.39:5000/chatroom/"+chatroom_id,
+            url: "http://api.dyspochat.com/chatroom/"+chatroom_id,
             method: "GET",
             headers: {
               'x-api-key': 'wowotek-key',
@@ -231,7 +231,7 @@
         for(var i=0; i<this.chatrooms.length; i++){
           if(this.chatrooms[i].id == chatroom_id){
             this.axios({
-                url: "http://34.101.203.39:5000/chatroom/"+this.chatrooms[i].id,
+                url: "http://api.dyspochat.com/chatroom/"+this.chatrooms[i].id,
                 method: "GET",
                 headers: {
                   'x-api-key': 'wowotek-key',
@@ -312,7 +312,7 @@
         
         if(action == "add"){  // Add Chatroom
           this.axios          // Join Chatroom after creating it
-            .post("http://34.101.203.39:5000/chatroom", {
+            .post("http://api.dyspochat.com/chatroom", {
                 chatroom_id: chatroom_data.id,
                 recipient_id: this.user.id
             },{
@@ -327,7 +327,7 @@
                     console.log("GET Chatroominfo");
                     console.log(chatroom_data.id);
                     this.axios({
-                        url: "http://34.101.203.39:5000/chatroom/"+chatroom_data.id,
+                        url: "http://api.dyspochat.com/chatroom/"+chatroom_data.id,
                         method: "GET",
                         headers: {
                           'x-api-key': 'wowotek-key',
@@ -365,7 +365,7 @@
           console.log("GET Chatroominfo");
           console.log(chatroom_data.id);
           this.axios({
-              url: "http://34.101.203.39:5000/chatroom/"+chatroom_data.id,
+              url: "http://api.dyspochat.com/chatroom/"+chatroom_data.id,
               method: "GET",
               headers: {
                 'x-api-key': 'wowotek-key',

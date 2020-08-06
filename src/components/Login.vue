@@ -62,7 +62,7 @@ export default {
                 return;
             }
             this.axios
-                .post("http://34.101.203.39:5000/user",{
+                .post("http://api.dyspochat.com/user",{
                     username: this.username,
                     password: this.password
                 }, {
@@ -96,7 +96,7 @@ export default {
                 return;
             }
             this.axios
-                .put("http://34.101.203.39:5000/user",{
+                .put("http://api.dyspochat.com/user",{
                     username: this.username,
                     password: this.password
                 }, {
