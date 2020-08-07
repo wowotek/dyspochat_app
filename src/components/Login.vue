@@ -51,7 +51,7 @@ export default {
         }
     },
     methods: {
-        login: async function(){
+        login: function(){
             // // Check Fields Validity ---
             // if(!this.username){
                 //     this.message = "Username cannot Be Empty";
@@ -88,7 +88,7 @@ export default {
                     this.processing = false;
                 });
         },
-        register: async function(){
+        register: function(){
             // Check Fields Validity ---
             // if(!this.username){
                 //     this.message = "Username cannot Be Empty";

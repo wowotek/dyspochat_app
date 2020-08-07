@@ -127,7 +127,7 @@
       return datas;
     },
     methods: {
-      async sortMessage(messages){
+      sortMessage(messages){
         let len = messages.length;
         for (let i = 0; i < len; i++) {
             let min = i;
@@ -144,11 +144,11 @@
         }
         return messages;
       },
-      async messageSent(chatroom_id){
+      messageSent(chatroom_id){
         this.chatroom.chats = await this.sortMessage(this.chatroom.chats);
         await this.openChatroom(chatroom_id);
       },
-      async search(evt){
+      search(evt){
         console.log("searching for " + this.search_bar);
         var match = [];
         function add_to_match(adder){
@@ -181,7 +181,7 @@
           }
         }
       },
-      async delete_room(room_id){
+      delete_room(room_id){
         this.axios
           .post(Config.HOST + "/chatroom/delete",{
               chatroom_id: room_id
@@ -212,7 +212,7 @@
               this.processing = false;
         });
       },
-      async leave_room(room_id){
+      leave_room(room_id){
         this.axios
           .post(Config.HOST + "/chatroom/recipient/delete",{
               chatroom_id: room_id,
@@ -246,10 +246,10 @@
         console.log("Leaving Chatroom");
         console.log(this.chatroom);
       },
-      async push_notification(notification_message){
+      push_notification(notification_message){
         console.log(notification_message);
       },
-      async message_update(chatroom_id){
+      message_update(chatroom_id){
         this.axios
           .post(Config.HOST + "/chatroom/info",{
               chatroom_id: chatroom_id
@@ -274,7 +274,7 @@
               this.processing = false;
         });
       },
-      async openChatroom(chatroom_id){
+      openChatroom(chatroom_id){
         for(var i=0; i<this.chatrooms.length; i++){
           if(this.chatrooms[i].id == chatroom_id){
             this.axios
@@ -304,7 +304,7 @@
           }
         }
       },
-      async setAuthenticated(login_status, session, user){
+      setAuthenticated(login_status, session, user){
         this.authenticated = true;
         this.session = {
           id: session.id,
@@ -323,7 +323,7 @@
           secret: '5ca06be10cf15aa08d86'
         });
       },
-      async handleMenuAction(action, chatroom_data){
+      handleMenuAction(action, chatroom_data){
         this.recipient_notifications = this.pusher.subscribe(
           chatroom_data.id.toString()
         );
