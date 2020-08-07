@@ -51,20 +51,20 @@ export default {
         }
     },
     methods: {
-        login: function(){
-            this.processing = true;
-            // Check Fields Validity ---
-            if(!this.username){
-                this.message = "Username cannot Be Empty";
-                this.message_class = "has-background-danger";
-                return;
-            }
-            if(!this.password){
-                this.message = "Password cannot Be Empty";
-                this.message_class = "has-background-danger";
-                return;
-            }
+        login: async function(){
+            // // Check Fields Validity ---
+            // if(!this.username){
+                //     this.message = "Username cannot Be Empty";
+            //     this.message_class = "has-background-danger";
+            //     return;
+            // }
+            // if(!this.password){
+                //     this.message = "Password cannot Be Empty";
+            //     this.message_class = "has-background-danger";
+            //     return;
+            // }
             // --- End Check Fields Validity
+            this.processing = true;
             this.axios
                 .post(Config.HOST + "/user/login",{
                     username: this.username,
@@ -88,20 +88,20 @@ export default {
                     this.processing = false;
                 });
         },
-        register: function(){
-            this.processing = true;
+        register: async function(){
             // Check Fields Validity ---
-            if(!this.username){
-                this.message = "Username cannot Be Empty";
-                this.message_class = "has-background-danger";
-                return;
-            }
-            if(!this.password){
-                this.message = "Password cannot Be Empty";
-                this.message_class = "has-background-danger";
-                return;
-            }
+            // if(!this.username){
+                //     this.message = "Username cannot Be Empty";
+            //     this.message_class = "has-background-danger";
+            //     return;
+            // }
+            // if(!this.password){
+                //     this.message = "Password cannot Be Empty";
+            //     this.message_class = "has-background-danger";
+            //     return;
+            // }
             // --- End Check Fields Validity
+            this.processing = true;
             this.axios
                 .post(Config.HOST + "/user/register",{
                     username: this.username,

@@ -145,7 +145,7 @@
       return datas;
     },
     methods: {
-      search(evt){
+      async search(evt){
         console.log("searching for " + this.search_bar);
         var match = [];
         function add_to_match(adder){
@@ -178,7 +178,7 @@
           }
         }
       },
-      delete_room(room_id){
+      async delete_room(room_id){
         this.axios
           .post(Config.HOST + "/chatroom/delete",{
               chatroom_id: room_id
@@ -209,7 +209,7 @@
               this.processing = false;
         });
       },
-      leave_room(room_id){
+      async leave_room(room_id){
         this.axios
           .post(Config.HOST + "/chatroom/recipient/delete",{
               chatroom_id: room_id,
@@ -243,10 +243,10 @@
         console.log("Leaving Chatroom");
         console.log(this.chatroom);
       },
-      push_notification(notification_message){
+      async push_notification(notification_message){
         console.log(notification_message);
       },
-      message_update(chatroom_id){
+      async message_update(chatroom_id){
         this.axios
           .post(Config.HOST + "/chatroom/info",{
               chatroom_id: chatroom_id
@@ -271,7 +271,7 @@
               this.processing = false;
         });
       },
-      openChatroom(chatroom_id){
+      async openChatroom(chatroom_id){
         for(var i=0; i<this.chatrooms.length; i++){
           if(this.chatrooms[i].id == chatroom_id){
             this.axios
@@ -301,7 +301,7 @@
           }
         }
       },
-      setAuthenticated(login_status, session, user){
+      async setAuthenticated(login_status, session, user){
         this.authenticated = true;
         this.session = {
           id: session.id,
@@ -320,7 +320,7 @@
           secret: '5ca06be10cf15aa08d86'
         });
       },
-      handleMenuAction(action, chatroom_data){
+      async handleMenuAction(action, chatroom_data){
         this.recipient_notifications = this.pusher.subscribe(
           chatroom_data.id.toString()
         );
