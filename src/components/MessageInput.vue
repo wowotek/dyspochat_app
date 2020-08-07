@@ -51,6 +51,7 @@ export default {
                 this.message_class = "has-background-danger";
                 this.processing = false;
             });
+        this.$emit("message_sent", this.chatroom.id);
       }
   }
 }

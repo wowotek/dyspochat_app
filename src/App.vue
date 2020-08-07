@@ -132,7 +132,7 @@
         for (let i = 0; i < len; i++) {
             let min = i;
             for (let j = i + 1; j < len; j++) {
-                if (messages[j].timestamp > messages[min].timestamp) {
+                if (messages[min].id > messages[j].id) {
                     min = j;
                 }
             }
@@ -145,7 +145,11 @@
         return messages;
       },
       messageSent(chatroom_id){
-        this.chatroom.chats = this.sortMessage(this.chatroom.chats);
+        console.log("Sorting...");
+        this.chatroom.chats.sort(function(x,y){
+          console.log(x.timestamp);
+          return x.timestamp - y.timestamp;
+        });
         this.openChatroom(chatroom_id);
       },
       search(evt){
@@ -289,7 +293,6 @@
                       this.message = "Successfully updating chatroom";
                       this.message_class = "has-background-success";
                       this.chatroom = response.data.chatroom;
-                      this.chatroom.chats = this.sortMessage(this.chatroom.chats);
                   } else {
                       this.message = "Chatroom Not Found !";
                       this.message_class = "has-background-danger";
@@ -386,7 +389,6 @@
                               this.message = "Successfully updating chatroom";
                               this.message_class = "has-background-success";
                               var rm = response.data.chatroom;
-                              rm.chats = this.sortMessage(this.chatroom.chats);
                               this.chatrooms.push(rm);
                               this.chatroom = rm;
                           } else {
@@ -431,7 +433,6 @@
                       }
                     }
                     var rm = response.data.chatroom;
-                    rm.chats = this.sortMessage(this.chatroom.chats);
                     this.chatrooms.push(rm);
                 } else {
                     this.message = "Chatroom Not Found !";
