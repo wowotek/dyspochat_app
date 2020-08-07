@@ -35,8 +35,8 @@
                 </div>
               </section>
               <section style="margin: 1%">
-                <ChatroomButton v-if="!this.search_bar" :chatrooms="chatrooms" v-on:open_chatroom="openChatroom"/>
-                <ChatroomButton v-else :chatrooms="search_chatrooms" v-on:open_chatroom="openChatroom"/>
+                <ChatroomButton v-if="!this.search_bar" :chatrooms="chatrooms" v-on:open_chatroom="this.openChatroom"/>
+                <ChatroomButton v-else :chatrooms="search_chatrooms" v-on:open_chatroom="this.openChatroom"/>
                 <hr>
                 <Roomlistmenu v-on:menu_action="handleMenuAction" :user="user"/>
               </section>
@@ -99,24 +99,6 @@
   import Config from './config'
   import Pusher from "pusher-js";
 
-  function sortMessage(messages){
-    let len = messages.length;
-    for (let i = 0; i < len; i++) {
-        let min = i;
-        for (let j = i + 1; j < len; j++) {
-            if (messages[min].timestamp > messages[j].timestamp) {
-                min = j;
-            }
-        }
-        if (min !== i) {
-            let tmp = messages[i];
-            messages[i] = messages[min];
-            messages[min] = tmp;
-        }
-    }
-    return messages;
-  }
-
   export default {
     name: 'App',
     components: {
@@ -145,8 +127,26 @@
       return datas;
     },
     methods: {
-      async message_sent(chatroom_id){
-        await this.openChatroom(this.chatroom);
+      async sortMessage(messages){
+        let len = messages.length;
+        for (let i = 0; i < len; i++) {
+            let min = i;
+            for (let j = i + 1; j < len; j++) {
+                if (messages[j].timestamp > messages[min].timestamp) {
+                    min = j;
+                }
+            }
+            if (min !== i) {
+                let tmp = messages[i];
+                messages[i] = messages[min];
+                messages[min] = tmp;
+            }
+        }
+        return messages;
+      },
+      async messageSent(chatroom_id){
+        this.chatroom.chats = await this.sortMessage(this.chatroom.chats);
+        await this.openChatroom(chatroom_id);
       },
       async search(evt){
         console.log("searching for " + this.search_bar);
@@ -289,7 +289,7 @@
                       this.message = "Successfully updating chatroom";
                       this.message_class = "has-background-success";
                       this.chatroom = response.data.chatroom;
-                      this.chatroom.chats = sortMessage(this.chatroom.chats);
+                      this.chatroom.chats = this.sortMessage(this.chatroom.chats);
                   } else {
                       this.message = "Chatroom Not Found !";
                       this.message_class = "has-background-danger";
@@ -386,7 +386,7 @@
                               this.message = "Successfully updating chatroom";
                               this.message_class = "has-background-success";
                               var rm = response.data.chatroom;
-                              rm.chats = sortMessage(this.chatroom.chats);
+                              rm.chats = this.sortMessage(this.chatroom.chats);
                               this.chatrooms.push(rm);
                               this.chatroom = rm;
                           } else {
@@ -431,7 +431,7 @@
                       }
                     }
                     var rm = response.data.chatroom;
-                    rm.chats = sortMessage(this.chatroom.chats);
+                    rm.chats = this.sortMessage(this.chatroom.chats);
                     this.chatrooms.push(rm);
                 } else {
                     this.message = "Chatroom Not Found !";
