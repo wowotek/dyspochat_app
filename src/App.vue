@@ -27,7 +27,7 @@
               <section class="has-background-light" style="padding: 1%">
                 <div class="field">
                   <p class="control has-icons-left">
-                    <input class="input" type="text" placeholder="Search For Chat">
+                    <input class="input" type="text" placeholder="Search For Chat" v-model="search_bar" v-on:change="search" @input="search"/>
                     <span class="icon is-small is-left">
                       <i class="fas fa-search"></i>
                     </span>
@@ -35,7 +35,8 @@
                 </div>
               </section>
               <section style="margin: 1%">
-                <ChatroomButton :chatrooms="chatrooms" v-on:open_chatroom="openChatroom"/>
+                <ChatroomButton v-if="!this.search_bar" :chatrooms="chatrooms" v-on:open_chatroom="openChatroom"/>
+                <ChatroomButton v-else :chatrooms="search_chatrooms" v-on:open_chatroom="openChatroom"/>
                 <hr>
                 <Roomlistmenu v-on:menu_action="handleMenuAction" :user="user"/>
               </section>
@@ -95,6 +96,7 @@
   import ChatroomButton from "./components/ChatroomButton.vue"
   import MessageInput from './components/MessageInput.vue'
   import MessageBubble from './components/MessageBubble.vue'
+  import Config from './config'
   import Pusher from "pusher-js";
 
   function sortMessage(messages){
@@ -132,58 +134,72 @@
         session: {},
         chatroom: null,
         chatrooms: [],
+        search_chatrooms: [],
         message: "",
         message_class: "",
         pusher: null,
         recipient_notifications: null,
-        chat_notifications: null
+        chat_notifications: null,
+        search_bar: ""
       }
       return datas;
     },
     methods: {
-      delete_room(room_id){
-        this.axios({
-            url: "http://api.dyspochat.com/chatroom/"+room_id,
-            method: "DELETE",
-            headers: {
-              'x-api-key': 'wowotek-key',
-            }
-          })
-          .then(response_ => {
-            console.log(response_);
-            if(response_.data.status == "success"){
-              for(var i=0; i<this.chatrooms.length; i++){
-                if(this.chatrooms[i].id == room_id){
-                  this.chatrooms.splice(i);
-                  this.chatroom = null;
-                  return;
-                }
+      search(evt){
+        console.log("searching for " + this.search_bar);
+        var match = [];
+        function add_to_match(adder){
+          for(var k=0; k<match.length; k++){
+            if(match[k].id == adder.id) return;
+          }
+          match.push(adder)
+        }
+
+        if(this.search_bar != ""){
+          for(var i=0; i<this.chatrooms.length; i++){
+            var cr = this.chatrooms[i];
+            try{
+              var intSearch = parseInt(this.search_bar);
+              if(cr.id == intSearch){
+                add_to_match(cr);
               }
+            } catch {evt;}
+
+            for(var j=0; j<cr.chats.length; j++){
+              var crc = cr.chats[j];
+              if(crc.message == this.search_bar){
+                add_to_match(cr);
+              }
+              if(crc.message.includes(this.search_bar)){
+                add_to_match(cr);
+              }
+              console.log(crc.message);
             }
-          })
-          .catch(error => {
-            console.log(error);
-            this.message = "Unexpected error, try again";
-            this.message_class = "has-background-danger";
-            this.processing = false;
-          });
+          }
+        }
       },
-      leave_room(room_id){
+      delete_room(room_id){
         this.axios
-          .patch("http://api.dyspochat.com/chatroom", {
-              chatroom_id: room_id,
-              recipient_id: this.user.id
-          },{
+          .post(Config.HOST + "/chatroom/delete",{
+              chatroom_id: room_id
+            }, {
               headers: {'x-api-key': 'wowotek-key'}
           })
           .then(response => {
               this.processing = false;
               if (response.data.status == "success"){
-                  this.message = "Successfully Leaving Room";
+                  this.message = "Successfully deleting chatroom";
                   this.message_class = "has-background-success";
+                  this.chatroom = null;
+                  for(var i=0; i<this.chatrooms.length; i++){
+                    if(this.chatrooms[i].id == room_id) {
+                      this.chatrooms.splice(i, 1);
+                      return;
+                    }
+                  }
               } else {
-                  this.message = "Failed to Leave room";
-                  this.message_class = "has-background-warning";
+                  this.message = "Chatroom Not Found !";
+                  this.message_class = "has-background-danger";
               }
           })
           .catch(error => {
@@ -191,69 +207,98 @@
               this.message = "Unexpected error, try again";
               this.message_class = "has-background-danger";
               this.processing = false;
-          });
-          for(var i=0; i<this.chatrooms.length; i++){
-            if(this.chatrooms[i].id == room_id){
-              this.chatrooms.splice(i);
-              this.chatroom = null;
-              return;
-            }
+        });
+      },
+      leave_room(room_id){
+        this.axios
+          .post(Config.HOST + "/chatroom/recipient/delete",{
+              chatroom_id: room_id,
+              recipient_id: this.user.id
+            }, {
+              headers: {'x-api-key': 'wowotek-key'}
+          })
+          .then(response => {
+              this.processing = false;
+              if (response.data.status == "success"){
+                  this.message = "Successfully deleting chatroom";
+                  this.message_class = "has-background-success";
+              } else {
+                  this.message = "Chatroom Not Found !";
+                  this.message_class = "has-background-danger";
+              }
+          })
+          .catch(error => {
+              error;
+              this.message = "Unexpected error, try again";
+              this.message_class = "has-background-danger";
+              this.processing = false;
+        });
+        for(var i=0; i<this.chatrooms.length; i++){
+          if(this.chatrooms[i].id == room_id){
+            this.chatrooms.splice(i);
+            this.chatroom = null;
+            return;
           }
-          console.log("Leaving Chatroom");
-          console.log(this.chatroom);
+        }
+        console.log("Leaving Chatroom");
+        console.log(this.chatroom);
       },
       push_notification(notification_message){
         console.log(notification_message);
       },
       message_update(chatroom_id){
-        this.axios({
-            url: "http://api.dyspochat.com/chatroom/"+chatroom_id,
-            method: "GET",
-            headers: {
-              'x-api-key': 'wowotek-key',
-            }
+        this.axios
+          .post(Config.HOST + "/chatroom/info",{
+              chatroom_id: chatroom_id
+            }, {
+              headers: {'x-api-key': 'wowotek-key'}
           })
-          .then(response_ => {
-            console.log(response_);
-            if(response_.data.status == "success"){
-              this.chatroom = response_.data.chatroom;
-              this.chatroom.chats = sortMessage(this.chatroom.chats);
-            }
+          .then(response => {
+              this.processing = false;
+              if (response.data.status == "success"){
+                  this.message = "Successfully updating chatroom";
+                  this.message_class = "has-background-success";
+                  this.chatroom = response.data.chatroom;
+              } else {
+                  this.message = "Chatroom Not Found !";
+                  this.message_class = "has-background-danger";
+              }
           })
           .catch(error => {
-            console.log(error);
-            this.message = "Unexpected error, try again";
-            this.message_class = "has-background-danger";
-            this.processing = false;
-          });
+              error;
+              this.message = "Unexpected error, try again";
+              this.message_class = "has-background-danger";
+              this.processing = false;
+        });
       },
       openChatroom(chatroom_id){
         for(var i=0; i<this.chatrooms.length; i++){
           if(this.chatrooms[i].id == chatroom_id){
-            this.axios({
-                url: "http://api.dyspochat.com/chatroom/"+this.chatrooms[i].id,
-                method: "GET",
-                headers: {
-                  'x-api-key': 'wowotek-key',
-                }
+            this.axios
+              .post(Config.HOST + "/chatroom/info",{
+                  chatroom_id: chatroom_id
+                }, {
+                  headers: {'x-api-key': 'wowotek-key'}
               })
-              .then(response_ => {
-                console.log(response_);
-                if(response_.data.status == "success"){
-                  this.chatroom = response_.data.chatroom;
-                  this.chatroom.chats = sortMessage(this.chatroom.chats);
-                }
+              .then(response => {
+                  this.processing = false;
+                  if (response.data.status == "success"){
+                      this.message = "Successfully updating chatroom";
+                      this.message_class = "has-background-success";
+                      this.chatroom = response.data.chatroom;
+                      this.chatroom.chats = sortMessage(this.chatroom.chats);
+                  } else {
+                      this.message = "Chatroom Not Found !";
+                      this.message_class = "has-background-danger";
+                  }
               })
               .catch(error => {
-                console.log(error);
-                this.message = "Unexpected error, try again";
-                this.message_class = "has-background-danger";
-                this.processing = false;
-              });
-              
-              console.log(this.chatroom);
-              return;
-            }
+                  error;
+                  this.message = "Unexpected error, try again";
+                  this.message_class = "has-background-danger";
+                  this.processing = false;
+            });
+          }
         }
       },
       setAuthenticated(login_status, session, user){
@@ -312,7 +357,7 @@
         
         if(action == "add"){  // Add Chatroom
           this.axios          // Join Chatroom after creating it
-            .post("http://api.dyspochat.com/chatroom", {
+            .post(Config.HOST + "/chatroom/recipient/add", {
                 chatroom_id: chatroom_data.id,
                 recipient_id: this.user.id
             },{
@@ -326,27 +371,31 @@
 
                     console.log("GET Chatroominfo");
                     console.log(chatroom_data.id);
-                    this.axios({
-                        url: "http://api.dyspochat.com/chatroom/"+chatroom_data.id,
-                        method: "GET",
-                        headers: {
-                          'x-api-key': 'wowotek-key',
-                        }
+                    this.axios
+                      .post(Config.HOST + "/chatroom/info",{
+                          chatroom_id: chatroom_data.id
+                        }, {
+                          headers: {'x-api-key': 'wowotek-key'}
                       })
-                      .then(response_ => {
-                        console.log(response_);
-                        if(response_.data.status == "success"){
-                          var rm = response_.data.chatroom
-                          rm.chats = sortMessage(rm.chats);
-                          this.chatrooms.push(rm);
-                        }
+                      .then(response => {
+                          this.processing = false;
+                          if (response.data.status == "success"){
+                              this.message = "Successfully updating chatroom";
+                              this.message_class = "has-background-success";
+                              var rm = response.data.chatroom;
+                              rm.chats = sortMessage(this.chatroom.chats);
+                              this.chatrooms.push(rm);
+                          } else {
+                              this.message = "Chatroom Not Found !";
+                              this.message_class = "has-background-danger";
+                          }
                       })
                       .catch(error => {
-                        console.log(error);
-                        this.message = "Unexpected error, try again";
-                        this.message_class = "has-background-danger";
-                        this.processing = false;
-                      });
+                          error;
+                          this.message = "[handleMenuAction][add][chat_info] Unexpected error, try again";
+                          this.message_class = "has-background-danger";
+                          this.processing = false;
+                    });
                 } else if (response.data.status == "recipient_already_exist") {
                     this.message = "You already joined chatroom";
                     this.message_class = "has-background-warning";
@@ -357,31 +406,39 @@
             })
             .catch(error => {
                 error;
-                this.message = "Unexpected error, try again";
+                this.message = "[handleMenuAction][add] Unexpected error, try again";
                 this.message_class = "has-background-danger";
                 this.processing = false;
             });
         } else {
-          console.log("GET Chatroominfo");
-          console.log(chatroom_data.id);
-          this.axios({
-              url: "http://api.dyspochat.com/chatroom/"+chatroom_data.id,
-              method: "GET",
-              headers: {
-                'x-api-key': 'wowotek-key',
-              }
+          this.axios
+            .post(Config.HOST + "/chatroom/info",{
+                chatroom_id: chatroom_data.id
+              }, {
+                headers: {'x-api-key': 'wowotek-key'}
             })
-            .then(response_ => {
-              if(response_.data.status == "success"){
-                if(this.chatrooms.includes(response_.data.chatroom)) return;
-                this.chatrooms.push(response_.data.chatroom);
-              }
+            .then(response => {
+                this.processing = false;
+                if (response.data.status == "success"){
+                    if(this.chatrooms.includes(response.data.chatroom)) return;
+                    for(var i=0; i<this.chatrooms.length; i++){
+                      if(this.chatrooms[i].id == response.data.chatroom.id){
+                        return;
+                      }
+                    }
+                    var rm = response.data.chatroom;
+                    rm.chats = sortMessage(this.chatroom.chats);
+                    this.chatrooms.push(rm);
+                } else {
+                    this.message = "Chatroom Not Found !";
+                    this.message_class = "has-background-danger";
+                }
             })
             .catch(error => {
-              console.log(error);
-              this.message = "Unexpected error, try again";
-              this.message_class = "has-background-danger";
-              this.processing = false;
+                error;
+                this.message = "[handleMenuAction][else] Unexpected error, try again";
+                this.message_class = "has-background-danger";
+                this.processing = false;
           });
         }
       }

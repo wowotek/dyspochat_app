@@ -37,6 +37,8 @@
 </template>
 
 <script>
+import Config from '../config';
+
 export default {
     name: "Login",
     data: function() {
@@ -50,7 +52,8 @@ export default {
     },
     methods: {
         login: function(){
-            console.log("Hello");
+            this.processing = true;
+            // Check Fields Validity ---
             if(!this.username){
                 this.message = "Username cannot Be Empty";
                 this.message_class = "has-background-danger";
@@ -61,8 +64,9 @@ export default {
                 this.message_class = "has-background-danger";
                 return;
             }
+            // --- End Check Fields Validity
             this.axios
-                .post("http://api.dyspochat.com/user",{
+                .post(Config.HOST + "/user/login",{
                     username: this.username,
                     password: this.password
                 }, {
@@ -78,13 +82,15 @@ export default {
                     }
                 })
                 .catch(error => {
-                    error;
+                    console.log(error);
                     this.message = "unexpected error, try again";
                     this.message_class = "has-background-danger";
                     this.processing = false;
                 });
         },
         register: function(){
+            this.processing = true;
+            // Check Fields Validity ---
             if(!this.username){
                 this.message = "Username cannot Be Empty";
                 this.message_class = "has-background-danger";
@@ -95,8 +101,9 @@ export default {
                 this.message_class = "has-background-danger";
                 return;
             }
+            // --- End Check Fields Validity
             this.axios
-                .put("http://api.dyspochat.com/user",{
+                .post(Config.HOST + "/user/register",{
                     username: this.username,
                     password: this.password
                 }, {
@@ -105,10 +112,10 @@ export default {
                 .then(response => {
                     this.processing = false;
                     if (response.data.status == "success"){
-                        this.message = "You are now registered!";
+                        this.message = "You are now registered! try to login";
                         this.message_class = "has-background-success";
                     } else {
-                        this.message = "Failed to register";
+                        this.message = "Username Already Exist! Try Again";
                         this.message_class = "has-background-danger";
                     }
                 })

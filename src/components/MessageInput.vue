@@ -15,6 +15,8 @@
 </template>
 
 <script>
+import Config from '../config';
+
 export default {
   name: 'MessageInput',
   props: {
@@ -25,7 +27,7 @@ export default {
   methods: {
       send_message: function(){
         this.axios
-            .put("http://api.dyspochat.com/chat", {
+            .post(Config.HOST + "/chat/add", {
                 chatroom_id: this.chatroom.id,
                 chat_sender: this.user.id,
                 chat_message: this.message_content
@@ -38,8 +40,8 @@ export default {
                     this.message = "Successfully sent your message";
                     this.message_class = "has-background-success";
                     this.$emit("message_sent", this.chatroom.id);
-                } else {
-                    this.message = "Failed to send message";
+                } else if (response.data.status == "chat_sender_not_in_chatroom"){
+                    this.message = "You Are not in chatroom" + this.chatroom.id;
                     this.message_class = "has-background-warning";
                 }
             })

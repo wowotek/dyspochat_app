@@ -47,6 +47,8 @@
 </template>
 
 <script>
+import Config from '../config';
+
 export default {
   name: 'RoomlistMenu',
   props: {
@@ -62,7 +64,7 @@ export default {
       create_chatroom: function(){
           this.processing = true;
           this.axios
-            .put("http://api.dyspochat.com/chatroom", {}, {
+            .post(Config.HOST + "/chatroom/add", {}, {
                 headers: {'x-api-key': 'wowotek-key'}
             })
             .then(response => {
@@ -78,7 +80,7 @@ export default {
             })
             .catch(error => {
                 error;
-                this.message = "Unexpected error, try again";
+                this.message = "[create_chatroom] Unexpected error, try again";
                 this.message_class = "has-background-danger";
                 this.processing = false;
             });
@@ -86,7 +88,7 @@ export default {
       join_chatroom: function(){
           this.processing = true;
           this.axios
-            .post("http://api.dyspochat.com/chatroom", {
+            .post(Config.HOST + "/chatroom/recipient/add", {
                 chatroom_id: this.chat_id,
                 recipient_id: this.user.id
             },{
@@ -97,11 +99,11 @@ export default {
                 if (response.data.status == "success"){
                     this.message = "Successfully joined chatroom";
                     this.message_class = "has-background-success";
-                    this.$emit("menu_action", "join", {id: this.chat_id});
+                    this.$emit("menu_action", "join", {id: this.chat_id, recipients: [], chats: []});
                 } else if (response.data.status == "recipient_already_exist") {
                     this.message = "You already joined chatroom";
-                    this.message_class = "has-background-warning";
-                    this.$emit("menu_action", "join", {id: this.chat_id});
+                    this.message_class = "has-background-success";
+                    this.$emit("menu_action", "join", {id: this.chat_id, recipients: [], chats: []});
                 } else {
                     this.message = "Failed to join chatroom";
                     this.message_class = "has-background-warning";
@@ -109,7 +111,7 @@ export default {
             })
             .catch(error => {
                 error;
-                this.message = "Unexpected error, try again";
+                this.message = "[join_chatroom] Unexpected error, try again";
                 this.message_class = "has-background-danger";
                 this.processing = false;
             });
