@@ -4,5 +4,5 @@ const PRODUCTION = "http://api.dyspochat.com";
 DEVELOPMENT;
 PRODUCTION;
 export default {
-    HOST: DEVELOPMENT
+    HOST: PRODUCTION
 }
