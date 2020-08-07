@@ -145,8 +145,8 @@
         return messages;
       },
       messageSent(chatroom_id){
-        this.chatroom.chats = await this.sortMessage(this.chatroom.chats);
-        await this.openChatroom(chatroom_id);
+        this.chatroom.chats = this.sortMessage(this.chatroom.chats);
+        this.openChatroom(chatroom_id);
       },
       search(evt){
         console.log("searching for " + this.search_bar);
