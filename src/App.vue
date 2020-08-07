@@ -79,7 +79,7 @@
                   <div style="margin-bottom: 45%"></div>
                 </section>
                 <section class="has-background-dark" style="height: 8%; bottom: 0; padding: 1%; padding-top: 0.7%">
-                  <MessageInput :chatroom="chatroom" :user="user"/>
+                  <MessageInput :chatroom="chatroom" :user="user" v-on:message_sent="messageSent"/>
                 </section>
             </section>
           </div>
@@ -145,6 +145,9 @@
       return datas;
     },
     methods: {
+      async message_sent(chatroom_id){
+        await this.openChatroom(this.chatroom);
+      },
       async search(evt){
         console.log("searching for " + this.search_bar);
         var match = [];
@@ -385,6 +388,7 @@
                               var rm = response.data.chatroom;
                               rm.chats = sortMessage(this.chatroom.chats);
                               this.chatrooms.push(rm);
+                              this.chatroom = rm;
                           } else {
                               this.message = "Chatroom Not Found !";
                               this.message_class = "has-background-danger";
